@@ -8,4 +8,5 @@ int main()
     Maze maze;
     maze.GetMazeFile();
     maze.GetMaze();
+    maze.Show();
 }

@@ -1,4 +1,68 @@
 #include "Maze.h"
+#include <iomanip>
+
+void Maze::FindStart()
+{
+    // top wall
+    int column{};
+    for (auto cell : maze[0])
+    {
+        if (cell == (int)CellType::Space)
+        {
+            this->start.row = 0;
+            this->start.column = column;
+            this->maze[0][column] = (int)CellType::Start;
+            return;
+        }
+        column++;
+    }
+
+    // left wall
+    for (int row{ 1 }; row < maze.size(); row++)
+    {
+        if (maze[row][0] == (int)CellType::Space)
+        {
+            this->start.row = row;
+            this->start.column = 0;
+            this->maze[row][0] = (int)CellType::Start;
+            return;
+        }
+    }
+}
+
+void Maze::FindFinish()
+{
+    // bottom wall
+    int bottom{ (int)maze.size() - 1 };
+
+    int column{};
+    for (auto cell : maze[bottom])
+    {
+        if (cell == (int)CellType::Space)
+        {
+            this->finish.row = bottom;
+            this->finish.column = column;
+            this->maze[bottom][column] = (int)CellType::Finish;
+            return;
+        }
+        column++;
+    }
+
+    // right wall
+    int right{ (int)maze[0].size() - 1 };
+
+    for (int row{}; row < bottom; row++)
+    {
+        if (maze[row][right] == (int)CellType::Space)
+        {
+            this->finish.row = row;
+            this->finish.column = right;
+            this->maze[row][right] = (int)CellType::Finish;
+            return;
+        }
+    }
+
+}
 
 void Maze::GetMazeFile()
 {
@@ -48,14 +112,91 @@ void Maze::GetMazeFile()
     this->fileName = fileName;
 }
 
-Matrix Maze::GetMaze()
+void Maze::GetMaze()
 {
     std::ifstream fileMaze(this->fileName, std::ios::in);
     std::string lineMaze;
 
     while (std::getline(fileMaze, lineMaze))
-        std::cout << lineMaze << "\n";
+    {
+        // std::cout << lineMaze << "\n";
+        std::vector<int> lineMatrixMaze;
+        for (char symbol : lineMaze)
+        {
+            SymbolType st = (SymbolType)symbol;
+            switch (st)
+            {
+            case SymbolType::Space:
+                lineMatrixMaze.push_back((int)CellType::Space);
+                break;
+            case SymbolType::Wall:
+                lineMatrixMaze.push_back((int)CellType::Wall);
+                break;
+            default:
+                break;
+            }
+        }
+        this->maze.push_back(lineMatrixMaze);
+    }
+        
+    fileMaze.close();
 
-    return Matrix();
+    FindStart();
+    FindFinish();
 }
 
+void Maze::Show()
+{
+    for (auto line : maze)
+    {
+        for (auto cell : line)
+        {
+            CellType cellType{ (CellType)cell };
+            switch (cellType)
+            {
+            case CellType::Space:
+                std::cout << (char)ConsoleType::Space;
+                break;
+            case CellType::Wall:
+                std::cout << (char)ConsoleType::Wall;
+                break;
+            case CellType::Start:
+                std::cout << "S";
+                break;
+            case CellType::Finish:
+                std::cout << "F";
+                break;
+            default:
+                break;
+            }
+        }
+        std::cout << "\n";
+    }
+}
+
+
+void Maze::WaveAlgorithm()
+{
+    const std::vector<Cell> offsets{ { -1, 0 }, { 0, 1 }, { 1, 0 }, { 0, -1 } };
+    Fronts fronts;
+
+    bool isFinish{ false };
+    bool isBreak{ false };
+    bool frontCurrent{ false };
+    int frontNumber{ 1 };
+
+    fronts[frontCurrent].push_back(this->start);
+
+    while (true)
+    {
+        fronts[!frontCurrent].clear();
+
+        for (auto frontCell : fronts[frontCurrent])
+        {
+            for (auto offset : offsets)
+            {
+
+            }
+        }
+    }
+}
