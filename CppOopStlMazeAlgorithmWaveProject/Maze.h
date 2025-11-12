@@ -19,11 +19,18 @@ struct Cell
 	{
 		return (left.row == right.row && left.column == right.column);
 	}
+
+	friend std::ostream& operator<<(std::ostream& out, const Cell& cell)
+	{
+		out << "(" << cell.row << "," << cell.column << ")";
+		return out;
+	}
 };
 
 using Matrix = std::vector<std::vector<int>>;
-using Fronts = std::array<std::vector<Cell>, 2>;
 using Front = std::vector<Cell>;
+using Fronts = std::array<Front, 2>;
+
 
 namespace fs = std::filesystem;
 
@@ -58,6 +65,8 @@ class Maze
 	Cell start;
 	Cell finish;
 
+	Front way;
+
 	void FindStart();
 	void FindFinish();
 public:
@@ -65,6 +74,7 @@ public:
 	void GetMaze();
 
 	void WaveAlgorithm();
+	void GreedyAlgorithm();
 
 	void Show();
 };

@@ -147,8 +147,10 @@ void Maze::GetMaze()
 
 void Maze::Show()
 {
+    int row{};
     for (auto line : maze)
     {
+        int column{};
         for (auto cell : line)
         {
             CellType cellType{ (CellType)cell };
@@ -156,22 +158,40 @@ void Maze::Show()
             {
             case CellType::Space:
                 std::cout << (char)ConsoleType::Space;
+                std::cout << (char)ConsoleType::Space;
                 break;
             case CellType::Wall:
                 std::cout << (char)ConsoleType::Wall;
+                std::cout << (char)ConsoleType::Wall;
                 break;
             case CellType::Start:
-                std::cout << "S";
+                std::cout << " S";
                 break;
             case CellType::Finish:
-                std::cout << "F";
+                std::cout << " F";
                 break;
             default:
+                if (std::ranges::find(this->way, Cell{row, column}) != way.end())
+                    std::cout << std::setw(2) << (char)ConsoleType::Way;
+                else
+                    std::cout << "  ";
                 break;
             }
+            column++;
         }
+        row++;
         std::cout << "\n";
     }
+    std::cout << "\n";
+
+    if (this->way.size() > 0)
+    {
+        std::cout << "Way: ";
+        for (auto wayCell : this->way)
+            std::cout << wayCell << " ";
+        std::cout << "\n";
+    }
+    
 }
 
 
@@ -180,7 +200,7 @@ void Maze::WaveAlgorithm()
     const std::vector<Cell> offsets{ { -1, 0 }, { 0, 1 }, { 1, 0 }, { 0, -1 } };
     Fronts fronts;
 
-    bool isFinish{ false };
+    bool isFinish{ true };
     bool isBreak{ false };
     bool frontCurrent{ false };
     int frontNumber{ 1 };
@@ -193,10 +213,77 @@ void Maze::WaveAlgorithm()
 
         for (auto frontCell : fronts[frontCurrent])
         {
+            int crow{ frontCell.row };
+            int ccolumn{ frontCell.column };
+
             for (auto offset : offsets)
             {
+                int orow{ crow + offset.row };
+                int ocolumn{ ccolumn + offset.column };
+                if (orow < 0 || orow >= maze.size() ||
+                        ocolumn < 0 || ocolumn >= maze[0].size())
+                    continue;
+                if (maze[orow][ocolumn] == (int)CellType::Space ||
+                    maze[orow][ocolumn] == (int)CellType::Finish)
+                {
+                    fronts[!frontCurrent].push_back(Cell{ orow, ocolumn });
+                    if (maze[orow][ocolumn] == (int)CellType::Finish)
+                    {
+                        maze[orow][ocolumn] = frontNumber;
+                        isBreak = true;
+                        break;
+                    }
+                    maze[orow][ocolumn] = frontNumber;
+                }
+            }
+            if (isBreak) break;
+        }
+        if (isBreak) break;
+        if (fronts[!frontCurrent].size() == 0)
+        {
+            isFinish = false;
+            break;
+        }
+        frontCurrent = !frontCurrent;
+        frontNumber++;
+    }
+    
 
+    if (!isFinish) return;
+
+    this->way.push_back(finish);
+
+    while (true)
+    {
+        int wrow = this->way.back().row;
+        int wcolumn = this->way.back().column;
+
+        for (auto offset : offsets)
+        {
+            int orow = wrow + offset.row;
+            int ocolumn = wcolumn + offset.column;
+            if (orow < 0 || orow >= maze.size() || ocolumn < 0 || ocolumn >= maze[0].size())
+                continue;
+            if (maze[orow][ocolumn] == frontNumber - 1)
+            {
+                this->way.push_back(Cell{ orow, ocolumn });
+                break;
             }
         }
+
+        if (frontNumber - 1 == 0)
+            break;
+        frontNumber--;
     }
+    this->way.push_back(this->start);
+
+    /*std::reverse(way.begin(), way.end());
+    std::reverse(std::begin(way), std::end(way));
+
+    std::ranges::reverse(way.begin(), way.end());
+    std::ranges::reverse(std::begin(way), std::end(way));
+    std::ranges::reverse(std::ranges::begin(way),
+                         std::ranges::end(way));*/
+    
+    std::ranges::reverse(way);
 }

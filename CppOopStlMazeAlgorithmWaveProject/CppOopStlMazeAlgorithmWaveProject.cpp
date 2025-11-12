@@ -9,4 +9,6 @@ int main()
     maze.GetMazeFile();
     maze.GetMaze();
     maze.Show();
+    //maze.WaveAlgorithm();
+    //maze.Show();
 }
