@@ -39,7 +39,8 @@ enum class CellType
 	Space  = 0,
 	Wall   = -1,
 	Start  = -2,
-	Finish = -3
+	Finish = -3,
+	Way = 1
 };
 
 enum class SymbolType
@@ -67,8 +68,13 @@ class Maze
 
 	Front way;
 
+	const std::vector<Cell> offsets{ { -1, 0 }, { 0, 1 }, { 1, 0 }, { 0, -1 } };
+
 	void FindStart();
 	void FindFinish();
+	bool IsValidWay(Cell cell);
+	bool NextWay(Cell cell);
+
 public:
 	void GetMazeFile();
 	void GetMaze();

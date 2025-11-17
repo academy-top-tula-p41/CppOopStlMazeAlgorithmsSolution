@@ -64,6 +64,53 @@ void Maze::FindFinish()
 
 }
 
+bool Maze::IsValidWay(Cell cell)
+{
+    size_t height{ maze.size() };
+    size_t width{ maze[0].size() };
+
+    if (cell.row < 0 || cell.row >= height
+            || cell.column < 0 || cell.column >= width)
+        return false;
+
+    if (maze[cell.row][cell.column] == (int)CellType::Wall)
+        return false;
+
+    if (maze[cell.row][cell.column] == (int)CellType::Way)
+        return false;
+
+    return true;
+}
+
+bool Maze::NextWay(Cell cell)
+{
+    if (cell == finish)
+    {
+        maze[cell.row][cell.column] = (int)CellType::Way;
+        return true;
+    }
+
+    for (auto offset : offsets)
+    {
+        int orow = cell.row + offset.row;
+        int ocolumn = cell.column + offset.column;
+
+        if (IsValidWay(Cell{ orow, ocolumn }))
+        {
+            maze[cell.row][cell.column] = (int)CellType::Way;
+            Show();
+
+            if (NextWay(Cell{ orow, ocolumn }))
+                return true;
+
+            maze[cell.row][cell.column] = (int)CellType::Space;
+            Show();
+        }
+    }
+
+    return false;
+}
+
 void Maze::GetMazeFile()
 {
     auto currentPath = fs::current_path();
@@ -170,6 +217,9 @@ void Maze::Show()
             case CellType::Finish:
                 std::cout << " F";
                 break;
+            case CellType::Way:
+                std::cout << std::setw(2) << (char)ConsoleType::Way;
+                break;
             default:
                 if (std::ranges::find(this->way, Cell{row, column}) != way.end())
                     std::cout << std::setw(2) << (char)ConsoleType::Way;
@@ -197,7 +247,7 @@ void Maze::Show()
 
 void Maze::WaveAlgorithm()
 {
-    const std::vector<Cell> offsets{ { -1, 0 }, { 0, 1 }, { 1, 0 }, { 0, -1 } };
+    //const std::vector<Cell> offsets{ { -1, 0 }, { 0, 1 }, { 1, 0 }, { 0, -1 } };
     Fronts fronts;
 
     bool isFinish{ true };
@@ -286,4 +336,9 @@ void Maze::WaveAlgorithm()
                          std::ranges::end(way));*/
     
     std::ranges::reverse(way);
+}
+
+void Maze::GreedyAlgorithm()
+{
+    NextWay(start);
 }
